@@ -11,8 +11,8 @@ PrimaryGeneratorAction::PrimaryGeneratorAction():particle_number(1),particle_nam
 
 	neutron_position = G4ThreeVector(0,0,0); neutron_momentum_dir = G4ThreeVector(0,0,1);
 	neutron_energy = 0.01*MeV;
-	positron_position = G4ThreeVector(0,0,0); positron_momentum_dir = G4ThreeVector(0,0,1);
-	positron_energy = 2*MeV;
+	positron_position = G4ThreeVector(0,0,0); positron_momentum_dir = G4ThreeVector(0,1,1);
+	positron_energy = 1*MeV;
 	time_delay = 100*ns;	// needed to distinguish e+ from n.
 
 	ix = DetectorConstruction::GetPointer()->GetNx()/2;
@@ -43,7 +43,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent){
 		fParticleGun->GeneratePrimaryVertex(anEvent);
 	}
 	else{
-		DetectorConstruction* detector = DetectorConstruction::GetPointer();
+		DetectorConstruction* detector = DetectorConstruction::GetPointer();//what does it do
 		G4ThreeVector center = detector->GetCenter(ix, iy, iz);
 		G4double lx = detector->GetLengthX();	lx = lx>10*cm?10*cm:lx;
 		G4double ly = detector->GetLengthY();	ly = ly>10*cm?10*cm:ly;
@@ -74,6 +74,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent){
 		fParticleGun->SetParticlePosition(positron_position);
 
 		positron_momentum_dir = anti_v->GetPositronDirection();
+//anti_v has a sampling for neutrin
 		fParticleGun->SetParticleMomentumDirection(positron_momentum_dir);
 
 		positron_energy = anti_v -> GetPositronEnergy();
