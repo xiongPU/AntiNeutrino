@@ -1,0 +1,4 @@
+/run/verbose 1
+/control/execute vis.mac
+/vis/open OI
+/run/beamOn 1

@@ -1,0 +1,51 @@
+#include "PrimaryGeneratorAction.hh"
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+PrimaryGeneratorAction::PrimaryGeneratorAction(){
+
+//	fParticleGun  = new G4GeneralParticleSource ();
+
+    fParticleGun  = new G4ParticleGun();
+   G4ParticleDefinition* particle = G4ParticleTable::GetParticleTable()->FindParticle("e-");
+   fParticleGun->SetParticleDefinition(particle);
+G4cout<<"Please input energy factor...\n";
+	G4double energy;
+	G4cin>> energy;
+ 	energy *= 18.6*keV;//(0.75+G4UniformRand()*0.25)*18.6*keV;
+   fParticleGun->SetParticleEnergy(energy);    
+}
+
+PrimaryGeneratorAction::~PrimaryGeneratorAction()
+{
+	G4cout<<"Deleting particle gun..."<<G4endl;
+	delete fParticleGun;
+}
+
+
+void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
+{
+  //this function is called at the begining of event
+  //
+  // G4double halfSize; // = 0.5*(fDetector->GetSize());
+  // G4double x0; // = - halfSize;
+  
+  // //randomize (y0,z0)
+  // //
+  // G4double beam = 0.8*halfSize; 
+  // G4double y0 = (2*G4UniformRand()-1.)*beam;
+  // G4double z0 = (2*G4UniformRand()-1.)*beam;
+
+    
+   fParticleGun->SetParticlePosition(G4ThreeVector( (G4UniformRand()-0.5)*20*mm, (G4UniformRand()-0.5)*20*mm, -1.2*m));
+
+	//G4double energy = 0.755*18.6*keV;//(0.75+G4UniformRand()*0.25)*18.6*keV;
+//   fParticleGun->SetParticleEnergy(energy);    
+	G4ThreeVector momentum = G4ThreeVector(G4UniformRand(),G4UniformRand(),G4UniformRand());
+   fParticleGun->SetParticleMomentumDirection(momentum);
+
+  fParticleGun->GeneratePrimaryVertex(anEvent);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+

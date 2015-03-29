@@ -1,0 +1,42 @@
+#include "EventAction.hh"
+
+
+EventAction::EventAction(RunAction* RA)
+:fRunAction(RA),fDrawFlag("none"),fPrintModulo(10000)
+{
+//	fEventMessenger = new EventMessenger(this);
+}
+
+EventAction::~EventAction()
+{
+//	delete fEventMessenger;
+}
+
+void EventAction::BeginOfEventAction(const G4Event* evt){
+
+	G4int evtID = evt->GetEventID();
+//	G4cout<<"Beginning Event # "<<evtID<<G4endl;
+
+}
+
+void EventAction::EndOfEventAction(const G4Event* evt){
+
+	G4int evtID = evt->GetEventID();
+	G4String colName = "TES_hit_collection";
+//	G4cout<< "Processing Event # "<<evtID<<G4endl;
+
+	G4SDManager* sdman = G4SDManager::GetSDMpointer();
+	G4int collectionID = sdman->GetCollectionID(colName);
+	
+	if(evt->GetHCofThisEvent()){
+		TESHitsCollection* TES_HC = (TESHitsCollection*)evt->GetHCofThisEvent()->GetHC(collectionID);
+		G4int NofHits = TES_HC->GetSize();
+		if(TES_HC){
+			for( int i=0; i<NofHits; i++){
+				TESHit* hit = (*TES_HC)[i];
+				G4cout << hit->GetParticleName()<<'\t'<< hit->GetPosition()<<'\t'<< hit->GetEDep()<< G4endl;
+			}
+		}
+	}
+}
+

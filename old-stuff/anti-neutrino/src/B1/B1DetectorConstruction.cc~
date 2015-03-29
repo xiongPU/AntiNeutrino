@@ -1,0 +1,204 @@
+#include "B1DetectorConstruction.hh"
+#include "B1SteppingAction.hh"
+   // use of stepping action to set the accounting volume
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+B1DetectorConstruction::B1DetectorConstruction()
+: G4VUserDetectorConstruction()
+{DefineMaterials();
+ }
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+G4VPhysicalVolume* B1DetectorConstruction::Construct()
+{  
+        G4GeometryManager::GetInstance()->OpenGeometry();
+        G4PhysicalVolumeStore::GetInstance()->Clean();
+        G4LogicalVolumeStore::GetInstance()->Clean();
+        G4SolidStore::GetInstance()->Clean();
+
+        ConstructWorld();
+        ConstructShell();
+        ConstructElectrode();
+        ConstructSource();
+        ConstructCalorimeter();
+        ConstructField();
+
+        return world_physical;
+}
+//-------------------------world---------------------------------------------------------------------------------
+
+void B1DetectorConstruction::ConstructWorld(){
+
+        G4double world_radius = 402.83*4*mm;
+        G4double world_hf_length = 4.5*m;
+
+        world_solid  = new G4Tubs("world_solid",0*m,world_radius,world_hf_length,0,2*pi);
+        world_logical  = new G4LogicalVolume(world_solid, world_material, "world_logical");
+        world_logical->SetUserLimits(new G4UserLimits(DBL_MAX,DBL_MAX,DBL_MAX,0.1*eV));
+        world_physical = new G4PVPlacement(0,G4ThreeVector(0,0,0),"world_physical",world_logical,NULL,false,0);
+}
+//-------------------------shell---------------------------------------------------------------------------------
+
+void B1DetectorConstruction::ConstructShell(){
+
+        G4double phi_start = 0;
+        G4double phi_end = 2*pi;
+
+        const G4int numZ = 18;
+        G4double h = 5.0*mm;
+        G4double v = 3.0*mm;
+
+        // inner shell parameter from COMSOL. Carefull! In COMSOL x axis is the axis of symmetry.
+        G4double x0((-963.83-2*494.96)*mm),x1(-963.83*mm),x2(-715.96*mm),x3(711.20*mm),x4(963.83*mm),x5((963.83+2*431.46)*mm);
+        G4double y0(171.45/2*mm),y1(406.40/2*mm),y2(909.64/2*mm),y3(295.27/2*mm);
+
+        G4double z[numZ] = {x0,x1-h,x1-h,x1,x1,x2-h,x2-h,x2,x2,x3,x3,x3+h,x3+h,x4,x4,x4+h,x4+h,x5};
+        G4double rInner[numZ] = {y0,y0,y0,y0,y1,y1,y1,y1,y2,y2,y1,y1,y1,y1,y3,y3,y3,y3};
+        G4double rOuter[numZ] = {y0+v,y0+v,y1+v,y1+v,y1+v,y1+v,y2+v,y2+v,y2+v,y2+v,y2+v,y2+v,y1+v,y1+v,y1+v,y1+v,y3+v,y3+v};
+
+        shell_solid = new G4Polycone( "shell_solid", phi_start, phi_end, numZ, z, rInner, rOuter);
+        shell_logical = new G4LogicalVolume( shell_solid, shell_material, "shell_logical");
+        shell_physical = new G4PVPlacement( 0, G4ThreeVector(0,0,0), shell_logical, "shell", world_logical, false, 0);
+}
+
+void B1DetectorConstruction::ConstructElectrode(){
+
+        G4double eltrd_thickness = 3.18*mm;
+
+        G4double eltrd1_x0(-1928.8*mm), eltrd1_x1(-988.83*mm);
+        G4double eltrd1_r0(120.65/2*mm), eltrd1_r1(120.65/2*mm), eltrd1_hf_l((eltrd1_x1-eltrd1_x0)/2);
+        G4double eltrd2_x0(-963.83*mm), eltrd2_x1(-839.90*mm);
+        G4double eltrd2_r0(73.025*mm), eltrd2_r1(178.2*mm), eltrd2_hf_l((eltrd2_x1-eltrd2_x0)/2);
+        G4double eltrd3_x0(-814.90*mm), eltrd3_x1(-725.96*mm);
+        G4double eltrd3_r0(178.20*mm), eltrd3_r1(178.20*mm), eltrd3_hf_l((eltrd3_x1-eltrd3_x0)/2);
+        G4double eltrd4_x0(-705.96*mm), eltrd4_x1(-320.00*mm);
+        G4double eltrd4_r0(190.70), eltrd4_r1(402.83*mm), eltrd4_hf_l((eltrd4_x1-eltrd4_x0)/2);
+        G4double eltrd5_x0(-300.00*mm), eltrd5_x1(300.00*mm);
+        G4double eltrd5_r0(805.65/2*mm), eltrd5_r1(805.65/2*mm), eltrd5_hf_l((eltrd5_x1-eltrd5_x0)/2);
+        G4double eltrd6_x0(320.00*mm), eltrd6_x1(701.20*mm);
+        G4double eltrd6_r0(402.83*mm), eltrd6_r1(188.91*mm), eltrd6_hf_l((eltrd6_x1-eltrd6_x0)/2);
+        G4double eltrd7_x0(721.20*mm), eltrd7_x1(837.52*mm);
+        G4double eltrd7_r0(174.63*mm), eltrd7_r1(174.63*mm), eltrd7_hf_l((eltrd7_x1-eltrd7_x0)/2);
+        G4double eltrd8_x0(847.52*mm), eltrd8_x1(963.83*mm);
+        G4double eltrd8_r0(174.63*mm), eltrd8_r1(129.38*mm), eltrd8_hf_l((eltrd8_x1-eltrd8_x0)/2);
+        G4double eltrd9_x0(988.83*mm), eltrd9_x1(1801.8*mm);
+        G4double eltrd9_r0(111.13*mm), eltrd9_r1(111.13*mm), eltrd9_hf_l((eltrd9_x1-eltrd9_x0)/2);
+
+        eltrd1_solid = new G4Cons("eltrd1_solid",eltrd1_r0,eltrd1_r0+eltrd_thickness,eltrd1_r1,eltrd1_r1+eltrd_thickness,eltrd1_hf_l,0,2*pi);
+        eltrd2_solid = new G4Cons("eltrd2_solid",eltrd2_r0,eltrd2_r0+eltrd_thickness,eltrd2_r1,eltrd2_r1+eltrd_thickness,eltrd2_hf_l,0,2*pi);
+        eltrd3_solid = new G4Cons("eltrd3_solid",eltrd3_r0,eltrd3_r0+eltrd_thickness,eltrd3_r1,eltrd3_r1+eltrd_thickness,eltrd3_hf_l,0,2*pi);
+        eltrd4_solid = new G4Cons("eltrd4_solid",eltrd4_r0,eltrd4_r0+eltrd_thickness,eltrd4_r1,eltrd4_r1+eltrd_thickness,eltrd4_hf_l,0,2*pi);
+        eltrd5_solid = new G4Cons("eltrd5_solid",eltrd5_r0,eltrd5_r0+eltrd_thickness,eltrd5_r1,eltrd5_r1+eltrd_thickness,eltrd5_hf_l,0,2*pi);
+        eltrd6_solid = new G4Cons("eltrd6_solid",eltrd6_r0,eltrd6_r0+eltrd_thickness,eltrd6_r1,eltrd6_r1+eltrd_thickness,eltrd6_hf_l,0,2*pi);
+        eltrd7_solid = new G4Cons("eltrd7_solid",eltrd7_r0,eltrd7_r0+eltrd_thickness,eltrd7_r1,eltrd7_r1+eltrd_thickness,eltrd7_hf_l,0,2*pi);
+        eltrd8_solid = new G4Cons("eltrd8_solid",eltrd8_r0,eltrd8_r0+eltrd_thickness,eltrd8_r1,eltrd8_r1+eltrd_thickness,eltrd8_hf_l,0,2*pi);
+        eltrd9_solid = new G4Cons("eltrd9_solid",eltrd9_r0,eltrd9_r0+eltrd_thickness,eltrd9_r1,eltrd9_r1+eltrd_thickness,eltrd9_hf_l,0,2*pi);
+
+        eltrd1_logical = new G4LogicalVolume(eltrd1_solid,eltrd_material,"eltrd1_logical");
+        eltrd2_logical = new G4LogicalVolume(eltrd2_solid,eltrd_material,"eltrd2_logical");
+        eltrd3_logical = new G4LogicalVolume(eltrd3_solid,eltrd_material,"eltrd3_logical");
+        eltrd4_logical = new G4LogicalVolume(eltrd4_solid,eltrd_material,"eltrd4_logical");
+        eltrd5_logical = new G4LogicalVolume(eltrd5_solid,eltrd_material,"eltrd5_logical");
+        eltrd6_logical = new G4LogicalVolume(eltrd6_solid,eltrd_material,"eltrd6_logical");
+        eltrd7_logical = new G4LogicalVolume(eltrd7_solid,eltrd_material,"eltrd7_logical");
+        eltrd8_logical = new G4LogicalVolume(eltrd8_solid,eltrd_material,"eltrd8_logical");
+        eltrd9_logical = new G4LogicalVolume(eltrd9_solid,eltrd_material,"eltrd9_logical");
+
+        G4ThreeVector center1(0,0,(eltrd1_x0+eltrd1_x1)/2);
+        G4ThreeVector center2(0,0,(eltrd2_x0+eltrd2_x1)/2);
+        G4ThreeVector center3(0,0,(eltrd3_x0+eltrd3_x1)/2);
+        G4ThreeVector center4(0,0,(eltrd4_x0+eltrd4_x1)/2);
+        G4ThreeVector center5(0,0,(eltrd5_x0+eltrd5_x1)/2);
+        G4ThreeVector center6(0,0,(eltrd6_x0+eltrd6_x1)/2);
+        G4ThreeVector center7(0,0,(eltrd7_x0+eltrd7_x1)/2);
+        G4ThreeVector center8(0,0,(eltrd8_x0+eltrd8_x1)/2);
+        G4ThreeVector center9(0,0,(eltrd9_x0+eltrd9_x1)/2);
+
+        eltrd1_physical = new G4PVPlacement(0,center1,eltrd1_logical,"eltrd1",world_logical,false,0);
+        eltrd2_physical = new G4PVPlacement(0,center2,eltrd2_logical,"eltrd2",world_logical,false,0);
+        eltrd3_physical = new G4PVPlacement(0,center3,eltrd3_logical,"eltrd3",world_logical,false,0);
+        eltrd4_physical = new G4PVPlacement(0,center4,eltrd4_logical,"eltrd4",world_logical,false,0);
+        eltrd5_physical = new G4PVPlacement(0,center5,eltrd5_logical,"eltrd5",world_logical,false,0);
+        eltrd6_physical = new G4PVPlacement(0,center6,eltrd6_logical,"eltrd6",world_logical,false,0);
+        eltrd7_physical = new G4PVPlacement(0,center7,eltrd7_logical,"eltrd7",world_logical,false,0);
+        eltrd8_physical = new G4PVPlacement(0,center8,eltrd8_logical,"eltrd8",world_logical,false,0);
+        eltrd9_physical = new G4PVPlacement(0,center9,eltrd9_logical,"eltrd9",world_logical,false,0);
+}
+
+//-------------------------source--------------------------------------------------------------------------------
+
+void B1DetectorConstruction::ConstructSource(){
+
+        G4double source_radius(30*mm);
+        G4double source_hf_length(10*mm/2);
+        G4ThreeVector source_position(0,0,-4*m);
+
+        source_solid = new G4Tubs("source_solid",0,source_radius,source_hf_length,0,2*pi);
+        source_logical = new G4LogicalVolume(source_solid, source_material,"source_logical");
+        source_physical = new G4PVPlacement(0,source_position,source_logical,"source",world_logical,false,0);
+
+}
+//-------------------------Calorimeter---------------------------------------------------------------------------
+
+void B1DetectorConstruction::ConstructCalorimeter(){
+
+        G4double cal_radius(30*mm);
+        G4double cal_hf_length(10*mm/2);
+        G4ThreeVector cal_position(0,0,1.8*m);
+
+        cal_solid = new G4Tubs("cal_solid",0,cal_radius,cal_hf_length,0,2*pi);
+        cal_logical = new G4LogicalVolume(cal_solid,cal_material,"cal_logical");
+        cal_physical = new G4PVPlacement(0,cal_position,cal_logical,"calorimeter",world_logical,false,0);
+
+        G4String sd_name = "Transition_Edge_Sensor";
+//        TransitionEdgeSensor* sd = new TransitionEdgeSensor( "TES");
+//        G4SDManager* sdman = G4SDManager::GetSDMpointer();
+//        sdman->AddNewDetector(sd);
+//        cal_logical->SetSensitiveDetector(sd);
+
+}
+
+B1DetectorConstruction::~B1DetectorConstruction(){
+	G4cout<<"Deleting geometries...\n";
+  if (field) {
+	G4cout<<"Deleting EM field...\n";
+	delete field;
+	G4cout<<"EM field deleted...\n";
+	}
+}
+
+//-------------------------Material table------------------------------------------------------------------------
+
+void B1DetectorConstruction::DefineMaterials(){
+
+        G4double z, a, density;
+        world_material = new G4Material("Vacuum", z=1., a = 1.00794*g/mole, density= 1.0e-16*g/cm3);
+        source_material = new G4Material("Graphene", z=6., a = 12.01*g/mole, density= 2.267*g/cm3);
+        shell_material = new G4Material("Steel", z=26., a = 55.845*g/mole, density = 7.874*g/cm3);
+        eltrd_material = new G4Material("Copper", z=29., a = 63.546*g/mole, density = 8.96*g/cm3);
+        cal_material = new G4Material("Gold", z=79., a = 196.97*g/mole, density= 19.32*g/cm3);
+
+        G4cout << *(G4Material::GetMaterialTable()) << G4endl;
+}
+//-------------------------Electromagnetic field-----------------------------------------------------------------
+
+void B1DetectorConstruction::ConstructField(){
+
+        field = new EMfield();
+        G4FieldManager* fmgr = G4TransportationManager::GetTransportationManager()->GetFieldManager();
+        fmgr->SetDetectorField( field);
+
+        G4int nvar = 6;         //integrate over position, momentum, energy and time
+        G4EqMagElectricField* equation = new G4EqMagElectricField( field);
+        G4MagIntegratorStepper* stepper = new G4SimpleHeum( equation, nvar);
+
+        G4double minstep = 1*um;
+        G4MagInt_Driver* driver = new G4MagInt_Driver( minstep, stepper, stepper->GetNumberOfVariables());
+
+        G4ChordFinder* chordfinder = new G4ChordFinder( driver);
+        fmgr->SetChordFinder( chordfinder);
+}
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

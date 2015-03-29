@@ -1,0 +1,127 @@
+#ifndef B1DetectorConstruction_h
+#define B1DetectorConstruction_h 1
+
+#include "G4VUserDetectorConstruction.hh"
+#include "globals.hh"
+
+#include "EMfield.hh"
+#include "G4UserLimits.hh"
+#include "G4Material.hh"
+#include "G4NistManager.hh"
+#include "G4Box.hh"
+#include "G4Polycone.hh"
+#include "G4LogicalVolume.hh"
+#include "G4PVPlacement.hh"
+#include "G4GeometryManager.hh"
+#include "G4PhysicalVolumeStore.hh"
+#include "G4LogicalVolumeStore.hh"
+#include "G4SolidStore.hh"
+#include "G4Tubs.hh"
+#include "G4SimpleHeum.hh"
+#include "G4TransportationManager.hh"
+#include "G4FieldManager.hh"
+#include "G4ChordFinder.hh"
+#include "G4Cons.hh"
+//#include "TransitionEdgeSensor.hh"
+#include "G4VSensitiveDetector.hh"
+#include "G4SDManager.hh"
+
+#include "G4UnitsTable.hh"
+#include "G4SystemOfUnits.hh"
+class G4VPhysicalVolume;
+
+/// Detector construction class to define materials and geometry.
+
+class B1DetectorConstruction : public G4VUserDetectorConstruction
+{
+  public:
+    B1DetectorConstruction();
+    virtual ~B1DetectorConstruction();
+
+        virtual G4VPhysicalVolume* Construct();
+        void    ConstructWorld();
+        void    ConstructShell();
+        void    ConstructElectrode();
+        void    ConstructSource();
+        void    ConstructCalorimeter();
+        void    ConstructField();
+        const   G4VPhysicalVolume* GetWorld(){return world_physical;};
+private:
+
+        EMfield*        field;
+        void    DefineMaterials();
+
+//----------------World---------------------------------------------------
+
+        G4Material*     world_material;
+        G4Tubs* world_solid;
+        G4LogicalVolume*        world_logical;
+        G4VPhysicalVolume*      world_physical;
+
+//----------------Shell---------------------------------------------------
+
+        G4Material*     shell_material;
+        G4Polycone*     shell_solid;
+        G4LogicalVolume*        shell_logical;
+        G4VPhysicalVolume*      shell_physical;
+
+
+//----------------Electrodes----------------------------------------------
+
+        G4Material* eltrd_material;
+        G4Cons* eltrd1_solid;
+        G4LogicalVolume*        eltrd1_logical;
+        G4VPhysicalVolume*      eltrd1_physical;
+
+        G4Cons* eltrd2_solid;
+        G4LogicalVolume*        eltrd2_logical;
+        G4VPhysicalVolume*      eltrd2_physical;
+
+        G4Cons* eltrd3_solid;
+        G4LogicalVolume*        eltrd3_logical;
+        G4VPhysicalVolume*      eltrd3_physical;
+
+        G4Cons* eltrd4_solid;
+        G4LogicalVolume*        eltrd4_logical;
+        G4VPhysicalVolume*      eltrd4_physical;
+
+        G4Cons* eltrd5_solid;
+        G4LogicalVolume*        eltrd5_logical;
+        G4VPhysicalVolume*      eltrd5_physical;
+
+        G4Cons* eltrd6_solid;
+        G4LogicalVolume*        eltrd6_logical;
+        G4VPhysicalVolume*      eltrd6_physical;
+
+        G4Cons* eltrd7_solid;
+        G4LogicalVolume*        eltrd7_logical;
+        G4VPhysicalVolume*      eltrd7_physical;
+
+        G4Cons* eltrd8_solid;
+        G4LogicalVolume*        eltrd8_logical;
+        G4VPhysicalVolume*      eltrd8_physical;
+
+        G4Cons* eltrd9_solid;
+        G4LogicalVolume*        eltrd9_logical;
+        G4VPhysicalVolume*      eltrd9_physical;
+
+//----------------Graphene Source-----------------------------------------
+
+        G4Material*     source_material;
+        G4Tubs*         source_solid;
+        G4LogicalVolume*        source_logical;
+        G4VPhysicalVolume*      source_physical;
+
+//----------------Virtual Detector----------------------------------------
+
+        G4Material*     cal_material;
+        G4Tubs* cal_solid;
+        G4LogicalVolume*        cal_logical;
+        G4VPhysicalVolume*      cal_physical;
+};
+
+
+//....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
+
+#endif
+

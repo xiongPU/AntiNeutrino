@@ -1,0 +1,43 @@
+/vis/open OI
+
+/vis/viewer/set/autoRefresh false
+/vis/verbose errors
+
+/vis/drawVolume world
+/vis/viewer/set/viewpointThetaPhi 65 135 deg
+/vis/viewer/zoom 3.2
+
+#/vis/viewer/set/style wireframe
+
+/vis/viewer/set/background 1.0 1.0 1.0
+/vis/viewer/set/globalLineWidthScale 30
+/vis/scene/add/trajectories rich smooth
+
+#/vis/modeling/trajectories/create/drawByCharge
+#/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
+#/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
+#/vis/modeling/trajectories/drawByCharge-0/default/setLineWidth 2
+
+# To draw only gammas:
+/vis/filtering/trajectories/create/particleFilter
+/vis/filtering/trajectories/particleFilter-0/add gamma
+#
+# To invert the above, drawing all particles except gammas,
+# keep the above two lines but also add:
+/vis/filtering/trajectories/particleFilter-0/invert true
+
+/vis/modeling/trajectories/create/drawByParticleID
+/vis/modeling/trajectories/drawByParticleID-0/set e- red
+/vis/modeling/trajectories/drawByParticleID-0/set e+ magenta
+/vis/modeling/trajectories/drawByParticleID-0/set neutron yellow
+/vis/modeling/trajectories/drawByParticleID-0/set nu_e green
+
+/vis/scene/endOfEventAction accumulate
+
+# Re-establish auto refreshing and verbosity:
+/vis/viewer/set/autoRefresh true
+/vis/verbose warnings
+/vis/scene/add/hits
+#
+# For file-based drivers, use this to create an empty detector view:
+#/vis/viewer/flush
