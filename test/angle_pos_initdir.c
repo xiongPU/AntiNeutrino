@@ -1,5 +1,6 @@
 void angle_pos_initdir(){
-    TFile *f= new TFile("anti_001_1000000.root");
+    using namespace TMath;
+    TFile *f= new TFile("anti_1d5MeV_1cm_001_1E4.root");
     TTree *an_det =(TTree*) f.Get("an_det");
     Double_t p_x, p_y, p_z, p_cap_x, p_cap_y, p_cap_z, p_theta, p_phi, r_len, v1_x, v1_y, v1_z, v2_x, v2_y, v2_z, angle;
     TH1F *h_angle = new TH1F("h_angle","Angle between the positron displacement and its initial velocity",100,-15,180);
@@ -14,16 +15,22 @@ void angle_pos_initdir(){
     Int_t nentries=(Int_t)an_det->GetEntries();
     for (Int_t i = 0; i< nentries; i++){
         an_det->GetEntry(i);
-	v1_x = p_cap_x - p_x;
-	v1_y = p_cap_y - p_y;
-	v1_z = p_cap_z - p_z;
-	r_len = sqrt(v1_x**2 + v1_y**2 + v1_z**2);
-        v2_x = sin(p_theta)*cos(p_phi);
-	v2_y = sin(p_theta)*sin(p_phi);
-	v2_z = cos(p_theta);
-	angle = acos((v1_x * v2_x + v1_y * v2_y + v1_z * v2_z)/r_len)/3.14159*180;
-//	angle = (v1_x * v2_x + v1_y * v2_y + v1_z * v2_z);
-	h_angle->Fill(angle);
+	if(!(IsNaN(p_cap_x)||IsNaN(p_cap_y)||IsNaN(p_cap_z)||IsNaN(p_x)||IsNaN(p_y)||IsNaN(p_z))){
+            if(Finite(p_cap_x) && Finite(p_cap_y) && Finite(p_cap_z) && Finite(p_x) && Finite(p_y) &&Finite(p_z)){
+  //      if(!(IsNaN(p_cap_z))){
+    //        if(Finite(p_cap_z)){
+                v1_x = p_cap_x - p_x;
+	        v1_y = p_cap_y - p_y;
+	        v1_z = p_cap_z - p_z;
+		r_len = sqrt(v1_x**2 + v1_y**2 + v1_z**2);
+		v2_x = sin(p_theta)*cos(p_phi);
+		v2_y = sin(p_theta)*sin(p_phi);
+		v2_z = cos(p_theta);
+		angle = acos((v1_x * v2_x + v1_y * v2_y + v1_z * v2_z)/r_len)/3.14159*180;
+	//	angle = (v1_x * v2_x + v1_y * v2_y + v1_z * v2_z);
+		h_angle->Fill(angle);
+             }
+         }
     }
 //    f->Close();
     h_angle->Draw();
